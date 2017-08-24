@@ -8,7 +8,7 @@
 </head>
 <body>
     <main id="list" class="list">
-        <contact-list v-for="item in result" :key="item.id" :child="item"></contact-list>
+        <contact-list v-for="item in result" :key="item.id" :child="item"><button @click="deleteItem(index)">Delete</button></contact-list>
     </main>
     
 </body>
