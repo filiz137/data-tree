@@ -32,8 +32,6 @@ module.exports = {
             'css': path.resolve(__dirname, entryPath + '/assets/css'),
             'scss': path.resolve(__dirname, entryPath + '/assets/scss'),
             'vue$': 'vue/dist/vue.esm.js',
-            'vue-router$': 'vue-router/dist/vue-router.esm.js',
-            'vue-resource$': 'vue-resource/dist/vue-resource.es2015.js'
         }
     },
     module: {
@@ -80,7 +78,7 @@ module.exports = {
     // new bundleAnalyzer(),
     new webpack.DefinePlugin({
         'process.env': {
-            NODE_ENV: JSON.stringify('production')
+            NODE_ENV: JSON.stringify('development')
         }
     }),
     new ExtractTextPlugin({
