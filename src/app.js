@@ -13,12 +13,17 @@ Vue.component('contact-list', {
 			<div class="list-item-content">
 				<span class="list-item__name">{{ child.Name }}</span>
 				<span class="list-item__phone">{{ child.Phone }}</span>
-				<span class="list-item__city">{{ child.City }}</span>
-			<contact-list v-for="item in child.sub" :key="item.id" :child="item" :class="{ 'open' : child.toggle }"></contact-list>
+                <span class="list-item__city">{{ child.City }}</span>
+                <button v-on:click="deleteItems(child.ID)">Delete</button>
+			<contact-list v-for="item in child.sub" :key="item.id" :child="item" :class="{ 'open' : child.toggle }" v-on:delete="deleteItem(item.ID)"></contact-list>
             </div>
-            <button @click="deleteItem(index)">Delete</button>
 		</div>
-	`
+    `,
+    methods: {
+        deleteItems: function (item) {
+          this.$emit('delete')
+        }
+    },
 })
 let contact = new json({
 	el: '#list',
@@ -28,6 +33,16 @@ let contact = new json({
 		self.contactList();
 	},
 	methods: {
+        deleteItem: function (id) {
+			let self = this;
+
+			self.result.map(item => { 
+				 if (item.ID === id) {
+					 let index = self.result.indexOf(item);
+					 self.result.splice(index, 1)
+				 };
+			})
+		},
 		contactList: function() {
 			let self = this;
 			
@@ -74,15 +89,6 @@ let contact = new json({
             
 		let listfilter = list(self.arr, parent);
         self.result = self.result.concat(listfilter);
-
- 
-        function deleteItem(element, index, array) {
-            // self.result.splice(index, 1);
-            console.log(index);
-        }
-
-        self.arr.forEach(deleteItem);
- 
 
         // function sort(arr) {
         //     self.arr.sort(function(a, b) {
