@@ -11,12 +11,12 @@ Vue.component('contact-list', {
 				<input type="checkbox" :id="'item-' + child.ID" v-model="child.toggle">
 				<label class="list-item__toggle" :for="'item-' + child.ID" :class="{ 'child' : (child.sub && child.sub.length) }"></label>
 				<div class="list-item-content">
-					<span class="list-item__name">
+					<label class="list-item__name" :for="'item-' + child.ID">
 						{{ child.Name }}
 						<button class="list-item__delete" v-on:click="deleteItems(child)" v-if="child.parent">
 							Delete
 						</button>
-					</span>
+					</label>
 					<span class="list-item__phone">
 						{{ child.Phone }}
 					</span>
@@ -28,45 +28,45 @@ Vue.component('contact-list', {
 			</div>
     `,
     methods: {
-			findChild: function(arr, id) {
-				let self = this;
-				let result = arr.filter(item => {
-					self.$set(item, 'delete', true);
-					return (item.parentID === id);
-				});
-				return result;
-			},
-			list: function(arr, data) {
-				let self = this;
-				data.filter(item => {
-					let result = [];
-					self.$set(item, 'delete', true);
-					if ((item.sub.length > 0)) self.list(self.arr, item.sub);
-					return item;
-				})
-				return data;
-			},
-			remove: function(arr) {
-				let self = this;
-				for (var i = self.$root.$data.arr.length - 1; i >= 0; i--) {
-					if (arr.indexOf(i) > -1) self.$delete(self.$root.$data.arr, i);
-				}
-			},
+		findChild: function(arr, id) {
+			let self = this;
+			let result = arr.filter(item => {
+				self.$set(item, 'delete', true);
+				return (item.parentID === id);
+			});
+			return result;
+		},
+		list: function(arr, data) {
+			let self = this;
+			data.filter(item => {
+				let result = [];
+				self.$set(item, 'delete', true);
+				if ((item.sub.length > 0)) self.list(self.arr, item.sub);
+				return item;
+			})
+			return data;
+		},
+		remove: function(arr) {
+			let self = this;
+			for (var i = self.$root.$data.arr.length - 1; i >= 0; i--) {
+				if (arr.indexOf(i) > -1) self.$delete(self.$root.$data.arr, i);
+			}
+		},
       deleteItems: function (item) {
-				let self = this;
-				let index = this.$root.$data.arr.indexOf(item);
+		let self = this;
+		let index = this.$root.$data.arr.indexOf(item);
 
-				if ((typeof item.parentID === 'undefined') || (item.parentID === 0)) {
-					let result = self.list(self.arr, item.sub);
+		if ((typeof item.parentID === 'undefined') || (item.parentID === 0)) {
+			let result = self.list(self.arr, item.sub);
 
-					let removed = [];
-					self.$root.$data.arr.map((el, idx) => {
-						if (el.delete) removed = removed.concat(idx);
-					})
+			let removed = [];
+			self.$root.$data.arr.map((el, idx) => {
+				if (el.delete) removed = removed.concat(idx);
+			})
 
-					self.remove(removed);
-					self.$delete(self.$root.$data.arr, index);
-				}
+			self.remove(removed);
+			self.$delete(self.$root.$data.arr, index);
+		}
       }
     },
 })
@@ -86,11 +86,9 @@ let contact = new json({
 			return result;
 		},
 		setRead: function(id) {
-			// if (id === 82) console.log(id)
 			let self = this;
 
 			let result = self.arr.map(item => {
-				// if (item.ID === id) item.readed = true;
 				if (item.ID === id) self.$set(item, 'readed', true);
 				return item;
 			})
@@ -108,7 +106,6 @@ let contact = new json({
 		list: function(arr, data) {
 			let self = this;
 			data.filter(item => {
-				// console.log(self.readed(arr).length);
 				let left = self.readed(arr);
 				let result = [];
 				if (left.length > 0) result = self.findChild(left, item.ID);
@@ -118,7 +115,7 @@ let contact = new json({
 
 				left = self.readed(arr);
 				if ((item.sub.length > 0) && (left.length > 0)) self.list(left, item.sub);
-
+				self.sort(item.sub);
 				return item;
 			})
 			return data;
@@ -132,11 +129,25 @@ let contact = new json({
 					return item;
 				};
 			});
+			self.sort(parent);
 			return parent;
 		},
 		getList: function () {
 			let self = this;
 			return self.list(self.arr, self.findParent());
+		},
+		sort: function(arr) {
+			arr.sort(function(a, b) {
+				var nameA = a.Name.toLowerCase();
+				var nameB = b.Name.toLowerCase();
+				if (nameA < nameB) {
+					return -1;
+				}
+				if (nameA > nameB) {
+					return 1;
+				}
+				return 0;
+			});
 		}
 	},
 	filters: {

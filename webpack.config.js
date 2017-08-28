@@ -78,7 +78,7 @@ module.exports = {
     // new bundleAnalyzer(),
     new webpack.DefinePlugin({
         'process.env': {
-            NODE_ENV: JSON.stringify('development')
+            NODE_ENV: JSON.stringify('production')
         }
     }),
     new ExtractTextPlugin({
@@ -117,7 +117,6 @@ module.exports = {
     // }])
     ]
 };
-
 
 if (process.env.NODE_ENV != 'production') {
     module.exports.devtool = '#source-map';

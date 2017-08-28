@@ -1,41 +1,44 @@
-@import url('https://fonts.googleapis.com/css?family=Roboto:300,400,700&subset=latin-ext');
-
-$toggle-color: lightgray;
-$toggle-sub-color: red;
-
-$delete-button: red;
+@import url('https://fonts.googleapis.com/css?family=Roboto:300,$text-weight,700&subset=latin-ext');
 
 $white: #fff;
+$red: red;
+$lightgray: lightgray;
+$fuchsia-blue: #6b4ecb;
+$mine-shaft: #313131;
 
-$background-color: #F0B35E;
-$background-sub-color: rgba(#fff, .2);
+// Colors
+$toggle-color: $lightgray;
+$toggle-icon-color: $mine-shaft;
+$toggle-sub-color: $red;
+$delete-button: $red;
+$delete-text: $white;
+$background-color: $fuchsia-blue;
+$background-sub-color: rgba($white, .2);
+
+// Fonts
+$text-font: 'Roboto', sans-serif;
 $text-color: $white;
+$title-text-size: 18px;
+$text-size: 14px;
+$bold-text-weight: 700;
+$normal-text-weight: 400;
+$light-text-weight: 300;
 
-
-// $base-color: rgb(230, 223, 249);
-$base-color: rgb(107, 78, 203);
-// $base-color: rgb(37, 31, 59);
-// $base-color: rgb(239, 109, 172);
-
+// BgColor For Loop
 $list-step: 22;
 $strength: 2;
-
 @for $i from 0 to $list-step {
 .list-item:nth-child(#{$i}) {
-	background-color: lighten($base-color, $i+$strength);
+	background-color: lighten($background-color, $i+$strength);
   }
 }
 .list-item:nth-child(1) {
-	background-color: $base-color;
+	background-color: $background-color;
 }
 .list-item:nth-child(2) {
-	background-color: lighten($base-color, 3);
+	background-color: lighten($background-color, 3);
 }
-// @for $i from 0 to $list-step {
-// 	.list-item:nth-child(#{$i}) {
-// 		background-color: darken($base-color, $i*$strength);
-//   }
-// }
+
 .list {
 	$list: &;
 	display: flex;
@@ -44,8 +47,8 @@ $strength: 2;
 	justify-content: flex-start;
 	align-items: stretch;
 	padding: 40px;
-	font-family: 'Roboto', sans-serif;
-	font-weight: 400;
+	font-family: $text-font;
+	font-weight: $normal-text-weight;
 	&-item {
 		display: flex;
 		flex-grow: 1;
@@ -74,9 +77,8 @@ $strength: 2;
 			align-items: stretch;
 			margin: 6px;
 			width: 20px;
-			font-size: 18px;
-			font-weight: 700;
-			//background-color: darken($background-color, 6%);
+			font-size: $title-text-size;
+			font-weight: $bold-text-weight;
 			&:before {
 				content: '';
 				display: none;
@@ -88,8 +90,9 @@ $strength: 2;
 				width: 20px;
 				height: 20px;
 				border-radius: 50%;
-				background-color: rgba(#fff, .8);
-				color: #313131;
+				background-color: rgba($white, .8);
+				color: $toggle-icon-color;
+				line-height: 20px;
 			}
 			&:after {
 				content: '';
@@ -98,7 +101,7 @@ $strength: 2;
 				align-self: center;
 				margin-bottom: 40px;
 				width: 2px;
-				background-color: rgba(#fff, .8);
+				background-color: rgba($white, .8);
 			}
 		}
 		&__name {
@@ -107,9 +110,11 @@ $strength: 2;
 			justify-content: space-between;
 			margin-bottom: 8px;
 			padding: 8px 12px;
-			border-bottom: 1px solid lighten($base-color, 10%);
-			font-size: 18px;
-			font-weight: 400;
+			border-bottom: 1px solid lighten($background-color, 10%);
+			font-size: $title-text-size;
+			font-weight: $normal-text-weight;
+			user-select: none;
+			cursor: pointer;
 		}
 		&__delete {
 			display: flex;
@@ -120,10 +125,11 @@ $strength: 2;
 			margin: 0;
 			padding: 4px 12px;
 			border: 0;
-			color: #fff;
+			color: $delete-text;
 			background-color: transparent;
-			font-size: 14px;
+			font-size: $text-size;
 			cursor: pointer;
+			outline: 0;
 			&:hover {
 				color: $delete-button;
 			}
@@ -136,8 +142,8 @@ $strength: 2;
 			display: flex;
 			flex-grow: 1;
 			padding: 8px 12px;
-			font-size: 14px;
-			font-weight: 300;
+			font-size: $text-size;
+			font-weight: $light-text-weight;
 		}
 		&__city {
 			&:before {
@@ -147,8 +153,8 @@ $strength: 2;
 			display: flex;
 			flex-grow: 1;
 			padding: 8px 12px;
-			font-size: 14px;
-			font-weight: 400;
+			font-size: $text-size;
+			font-weight: $normal-text-weight;
 		}
 		& #{$list}-item {
 			display: none;
