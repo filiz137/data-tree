@@ -8,8 +8,8 @@
 </head>
 <body>
     <main id="list" class="list">
-        <contact-list v-for="item in result" :key="item.ID" :child="item" v-on:delete="deleteItem(item)"></contact-list>
+        <contact-list v-for="item in findParent()" :key="item.ID" :child="item" v-on:delete="deleteItem(item)"></contact-list>
     </main>
-    
+
 </body>
 </html>

@@ -7,63 +7,67 @@ import json from './data.js';
 Vue.component('contact-list', {
 	props: ['child'],
     template: `
-		<div class="list-item">
-			<input type="checkbox" :id="'item-' + child.ID" v-model="child.toggle">
-            <label class="list-item__toggle" :for="'item-' + child.ID" :class="{ 'child' : child.sub.length > 0}"></label>
-			<div class="list-item-content">
-				<span class="list-item__name">{{ child.Name }}</span>
-				<span class="list-item__phone">{{ child.Phone }}</span>
-                <span class="list-item__city">{{ child.City }}</span>
-                <button v-on:click="deleteItems(child)">Delete</button>
-			<contact-list v-for="item in child.sub" :key="item.ID" :child="item" :class="{ 'open' : child.toggle }" v-on:delete="deleteItem(item.ID)"></contact-list>
-            </div>
-		</div>
+			<div class="list-item">
+				<input type="checkbox" :id="'item-' + child.ID" v-model="child.toggle">
+				<label class="list-item__toggle" :for="'item-' + child.ID" :class="{ 'child' : (child.sub && child.sub.length) }"></label>
+				<div class="list-item-content">
+					<span class="list-item__name">
+						{{ child.Name }}
+						<button class="list-item__delete" v-on:click="deleteItems(child)" v-if="child.parent">
+							Delete
+						</button>
+					</span>
+					<span class="list-item__phone">
+						{{ child.Phone }}
+					</span>
+					<span class="list-item__city">
+						{{ child.City }}
+					</span>
+					<contact-list v-for="item in child.sub" :key="item.ID" :child="item" :class="{ 'open' : child.toggle }" v-on:delete="deleteItem(item.ID)"></contact-list>
+				</div>
+			</div>
     `,
     methods: {
-        deleteItems: function (item) {
-			let self = this;
-
-			console.log(item.parentID);
-			console.log(item.ID);
-
-			// function removeFromTree(parent, childNameToRemove){
-			// 	parent = parent.filter((child) => {
-			// 		return child.ID !== childNameToRemove
-			// 	}).map((child) => {
-			// 		return removeFromTree(child.sub, childNameToRemove)
-			// 	});
-			// 	return parent;
-			//   }
-
-			//   let tree = removeFromTree(self.$root.$data.result, item.ID)         
-			//   console.log(tree);
-			
-			function finded(arr, id, param) {
-				return arr.filter((el) => {
-					let result = false;
-					if ((el[param] != id) && el.sub.length) {
-						return finded(el.sub, id, 'parentID')
-					} else if (el[param] === id) {
-						console.log('hello')
-						return el;
-
-					} else return false;
-					//result = ((el[param] != id) && el.sub.length) ? finded(el.sub, id, 'parentID') : el;
-					// if ((el[param] != id) && el.sub.length) return finded(el.sub, id, 'parentID');
-					// if (el[param] === id) return el;
-					// return result;
+			findChild: function(arr, id) {
+				let self = this;
+				let result = arr.filter(item => {
+					self.$set(item, 'delete', true);
+					return (item.parentID === id);
+				});
+				return result;
+			},
+			list: function(arr, data) {
+				let self = this;
+				data.filter(item => {
+					let result = [];
+					self.$set(item, 'delete', true);
+					if ((item.sub.length > 0)) self.list(self.arr, item.sub);
+					return item;
 				})
-			}
-			//console.log(finded(self.$root.$data.result, item.ID, 'ID'))
-			
+				return data;
+			},
+			remove: function(arr) {
+				let self = this;
+				for (var i = self.$root.$data.arr.length - 1; i >= 0; i--) {
+					if (arr.indexOf(i) > -1) self.$delete(self.$root.$data.arr, i);
+				}
+			},
+      deleteItems: function (item) {
+				let self = this;
+				let index = this.$root.$data.arr.indexOf(item);
 
-			//   self.$emit('delete')
-		// let index = this.$root.$data.result.indexOf(item);
-		// this.$delete(this.$root.$data.result, item.id);
-		// console.log(item.id)
-		// console.log(this.$root.$data.result)
-		//this.$root.$data.result.splice(index, 1)
-        }
+				if ((typeof item.parentID === 'undefined') || (item.parentID === 0)) {
+					let result = self.list(self.arr, item.sub);
+
+					let removed = [];
+					self.$root.$data.arr.map((el, idx) => {
+						if (el.delete) removed = removed.concat(idx);
+					})
+
+					self.remove(removed);
+					self.$delete(self.$root.$data.arr, index);
+				}
+      }
     },
 })
 
@@ -72,132 +76,70 @@ let contact = new json({
 	data: {},
 	created() {
 		let self = this;
-		self.contactList();
+		self.getList();
 	},
 	methods: {
-        deleteItem: function (id) {
-			let self = this;
-			console.log(id);
-			// self.result.map(item => { 
-			// 	 if (item.ID === id) {
-			// 		 let index = self.result.indexOf(item);
-			// 		 self.result.splice(index, 1)
-			// 	 };
-			// })
-		},
-		contactList: function() {
-			let self = this;
-			
-			let parent = self.arr.filter(item => {
-				if (typeof item.parentID === 'undefined') setRead(item.ID);
-				return ((typeof item.parentID === 'undefined') || (item.parentID === 0)); 
+		readed: function(data) {
+			let result = data.filter(item => {
+				return !item.readed;
 			});
-			
-			function readed(data) {
-				let result = data.filter(item => {
-					return !item.readed; 
-				});
-				return result;
-			}
-			
-			function setRead(id) {
-				let result = self.arr.map(item => { 
-					if (item.ID === id) item.readed = true;
+			return result;
+		},
+		setRead: function(id) {
+			// if (id === 82) console.log(id)
+			let self = this;
+
+			let result = self.arr.map(item => {
+				// if (item.ID === id) item.readed = true;
+				if (item.ID === id) self.$set(item, 'readed', true);
+				return item;
+			})
+
+			return result;
+		},
+		findChild: function(arr, id) {
+			let self = this;
+			let result = arr.filter(item => {
+				if (item.parentID === id) self.setRead(item.ID);
+				return (item.parentID === id);
+			});
+			return result;
+		},
+		list: function(arr, data) {
+			let self = this;
+			data.filter(item => {
+				// console.log(self.readed(arr).length);
+				let left = self.readed(arr);
+				let result = [];
+				if (left.length > 0) result = self.findChild(left, item.ID);
+				self.$set(item, 'sub', result);
+				self.$set(item, 'toggle', true);
+				self.setRead(item.ID);
+
+				left = self.readed(arr);
+				if ((item.sub.length > 0) && (left.length > 0)) self.list(left, item.sub);
+
+				return item;
+			})
+			return data;
+		},
+		findParent: function () {
+			let self = this;
+			let parent = self.arr.filter(item => {
+				if ((typeof item.parentID === 'undefined') || (item.parentID === 0)) {
+					self.setRead(item.ID);
+					self.$set(item, 'parent', true);
 					return item;
-				})
-				self.arr = result;
-				return result;
-			}
-			 
-			function findChild(arr, id) {
-				let result = arr.filter(item => {
-					if (item.parentID === id) setRead(item.ID);
-					return (item.parentID === id);
-				});
-				return result; 
-			}
-			
-			function list(arr, data) {
-				data.filter(item => { 
-					let result = findChild(readed(arr), item.ID); 
-					//item.sub = result; 
-					self.$set(item, 'sub', result);
-					self.$set(item, 'toggle', false);
-
-					if (item.sub.length > 0) list(readed(arr), item.sub);
-				})
-				return data;
-            }
-            
-		let listfilter = list(self.arr, parent);
-        self.result = self.result.concat(listfilter);
-
-        // function sort(arr) {
-        //     self.arr.sort(function(a, b) {
-        //         var nameA = a.item.Name.toUpperCase();
-        //         var nameB = b.item.Name.toUpperCase();
-        //         if (nameA < nameB) {
-        //             return -1;
-        //         }
-        //         if (nameA > nameB) {
-        //             return 1;
-        //         }
-
-        //         return 0;
-        //         });
-
-        //        return self.arr.sort();
-        //     }
-        
-		
+				};
+			});
+			return parent;
 		},
 		getList: function () {
 			let self = this;
-			
-			let parent = self.arr.filter(item => {
-				if (typeof item.parentID === 'undefined') setRead(item.ID);
-				return ((typeof item.parentID === 'undefined') || (item.parentID === 0)); 
-			});
-
-			function readed(data) {
-				let result = data.filter(item => {
-					return !item.readed; 
-				});
-				return result;
-			}
-			
-			function setRead(id) {
-				let result = self.arr.map(item => { 
-					if (item.ID === id) item.readed = true;
-					return item;
-				})
-				self.arr = result;
-				return result;
-			}
-
-			function findChild(arr, id) {
-				let result = arr.filter(item => {
-					if (item.parentID === id) setRead(item.ID);
-					return (item.parentID === id);
-				});
-				return result; 
-			}
-			
-			function list(arr, data) {
-				data.filter(item => { 
-					let result = findChild(readed(arr), item.ID); 
-					//item.sub = result; 
-					self.$set(item, 'sub', result);
-					self.$set(item, 'toggle', false);
-
-					if (item.sub.length > 0) list(readed(arr), item.sub);
-				})
-				return data;
-            }
-            
-			return list(self.arr, parent);
+			return self.list(self.arr, self.findParent());
 		}
-		
 	},
-	filters: {} 
-}); 
+	filters: {
+
+	}
+});
